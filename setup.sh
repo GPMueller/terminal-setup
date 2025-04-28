@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # Unified Terminal Environment Setup Script
-# Installs: tmux, zsh, exa, fzf, zoxide, starship, neovim, ripgrep
-# GitHub URL: https://github.com/GPMueller/terminal-setup/raw/main/setup.sh
-# Run: curl -sL https://raw.githubusercontent.com/GPMueller/terminal-setup/main/setup.sh | bash
+# Installs: tmux, zsh, eza, fzf, zoxide, starship, neovim, ripgrep
+# GitHub URL: https://github.com/yourusername/terminal-setup/raw/main/setup.sh
+# Run: curl -sL https://raw.githubusercontent.com/yourusername/terminal-setup/main/setup.sh | bash
 
 set -euo pipefail
 
@@ -28,7 +28,7 @@ install_dependencies() {
   
   if [[ "$PLATFORM" == "mac" ]]; then
     command -v brew >/dev/null || install_homebrew
-    brew install tmux zsh exa fzf zoxide neovim ripgrep
+    brew install tmux zsh eza fzf zoxide neovim ripgrep
     brew tap homebrew/cask-fonts
     brew install --cask font-hack-nerd-font
   else
@@ -49,13 +49,13 @@ install_homebrew() {
 }
 
 install_linux_tools() {
-  # Install exa
-  EXA_VERSION="0.10.1"
-  curl -LO https://github.com/ogham/exa/releases/download/v$EXA_VERSION/exa-linux-x86_64-v$EXA_VERSION.zip
-  unzip -q exa-linux-x86_64-v$EXA_VERSION.zip
-  sudo mv bin/exa /usr/local/bin/
-  rm -rf exa* bin man
-  
+  # Install eza (replacement for exa)
+  EZA_VERSION="0.18.1"
+  curl -LO https://github.com/eza-community/eza/releases/download/v${EZA_VERSION}/eza_${EZA_VERSION}_linux-x86_64.tar.gz
+  tar -xzf eza_${EZA_VERSION}_linux-x86_64.tar.gz
+  sudo mv eza /usr/local/bin/
+  rm -rf eza_* LICENSE man completions
+
   # Install ripgrep
   curl -LO https://github.com/BurntSushi/ripgrep/releases/download/14.1.0/ripgrep_14.1.0_amd64.deb
   sudo dpkg -i ripgrep_14.1.0_amd64.deb
@@ -72,9 +72,17 @@ setup_configs() {
   backup_file ~/.tmux.conf
   curl -sL https://gist.githubusercontent.com/yourusername/tmuxconf/raw > ~/.tmux.conf
   
-  # Zsh configuration
+  # Zsh configuration (updated for eza)
   backup_file ~/.zshrc
-  curl -sL https://gist.githubusercontent.com/yourusername/zshrc/raw > ~/.zshrc
+  cat << 'EOF' > ~/.zshrc
+# Modern command replacements
+alias ls='eza --group-directories-first --icons'
+alias ll='eza -l --icons --git'
+alias la='eza -la --icons --git'
+alias lt='eza --tree --level=2 --icons'
+
+# Rest of your zsh config...
+EOF
   
   # Starship config
   backup_file ~/.config/starship.toml 
