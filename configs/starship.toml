@@ -1,0 +1,41 @@
+# Minimal Starship prompt config
+add_newline = false
+
+# Enable and configure C++ module
+[golang]
+disabled = true
+
+[cpp]
+disabled = false
+format = "[$symbol($version(-$name) )]($style)"
+symbol = " "
+style = "bold blue"
+
+# Enable and configure Python module
+[python]
+disabled = false
+format = "[${symbol}${pyenv_prefix}(${version} )]($style)"
+symbol = "🐍 "
+style = "bold yellow"
+
+# Enable and configure Bazel module (custom command)
+[custom.bazel]
+command = "bazel --version 2>/dev/null | head -n1"
+detect_files = ["WORKSPACE", "WORKSPACE.bazel"]
+format = "[🚀 bazel $output]($style) "
+style = "bold green"
+
+# More informative git status
+[git_status]
+disabled = false
+conflicted = "[](bold red)"
+staged = "[](green)"
+modified = "[M](yellow)"
+renamed = "[](purple)"
+deleted = "[](red)"
+untracked = "[U](green)"
+stashed = "[](blue)"
+ignored = "[](grey)"
+ahead = "[⇡${count}](bold green)"
+behind = "[⇣${count}](bold red)"
+diverged = "[⇕⇡${ahead_count}⇣${behind_count}](bold purple)"

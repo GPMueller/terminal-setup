@@ -1,0 +1,30 @@
+# Zsh config for modern terminal
+# Enable completion, history, and starship prompt
+autoload -Uz compinit && compinit
+HISTFILE=~/.zsh_history
+HISTSIZE=10000
+SAVEHIST=10000
+setopt inc_append_history
+setopt share_history
+setopt hist_ignore_dups
+setopt hist_reduce_blanks
+setopt auto_cd
+setopt correct
+
+# Show icons by default in ls
+alias ls='eza --icons'
+
+# Starship prompt
+if command -v starship >/dev/null; then
+  eval "$(starship init zsh)"
+fi
+
+# fzf keybindings and completion
+if [ -f ~/.fzf.zsh ]; then
+  source ~/.fzf.zsh
+fi
+
+# zoxide init
+if command -v zoxide >/dev/null; then
+  eval "$(zoxide init zsh)"
+fi

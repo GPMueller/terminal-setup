@@ -1,0 +1,10 @@
+set number
+syntax on
+set mouse=a
+set clipboard=unnamedplus
+set tabstop=4
+set shiftwidth=4
+set expandtab
+set smartindent
+set autoindent
+set background=dark
