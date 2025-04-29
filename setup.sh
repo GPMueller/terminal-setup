@@ -14,6 +14,19 @@ main() {
   # Install all configuration files
   "$SCRIPT_DIR/install_configs.sh"
 
+  # Set default shell to nushell if not already
+  if [[ "$SHELL" != *nu ]]; then
+    echo "🔀 Setting Nushell as default shell..."
+    which nu > /dev/null 2>&1 || { echo "❌ Nushell (nu) not found in PATH"; exit 1; }
+    echo "  📝 Changing default shell..."
+    if [[ "$OS" == "macos" ]]; then
+      sudo dscl . -change /Users/$USER UserShell "$SHELL" "$(which nu)"
+    else
+      chsh -s "$(which nu)"
+    fi
+    echo "  ✅ Default shell changed to Nushell"
+  fi
+
   # Show completion message
   cat << EOF
 🎉 Installation complete! Restart your terminal or run:

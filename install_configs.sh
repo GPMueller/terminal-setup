@@ -4,7 +4,18 @@ set -euo pipefail
 
 # Directory where this script is located
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-CONFIGS_DIR="$SCRIPT_DIR/configs"
+SOURCE_CONFIGS_DIR="$SCRIPT_DIR/configs"
+
+# Detect operating system
+if [[ "$OSTYPE" == "darwin"* ]]; then
+    OS="macos"
+    CACHE_DIR="$HOME/Library/Caches"
+    TARGET_CONFIGS_DIR="$HOME/Library/Application Support"
+else
+    OS="linux"
+    CACHE_DIR="$HOME/.cache"
+    TARGET_CONFIGS_DIR="$HOME/.config"
+fi
 
 # Function to backup and install config
 install_config() {
@@ -24,42 +35,35 @@ install_config() {
 
 echo "📁 Creating cache directories..."
 # Create necessary cache directories
-mkdir -p ~/.cache/{starship,zoxide,fzf}
-mkdir -p ~/.config/nushell
+mkdir -p "$CACHE_DIR"/{starship,zoxide,fzf}
 echo "✅ Cache directories created"
 
 echo "🔧 Installing configuration files..."
 # Install tmux config
 echo "📦 Installing tmux configuration..."
-install_config "$CONFIGS_DIR/tmux.conf" ~/.tmux.conf
+install_config "$SOURCE_CONFIGS_DIR/tmux.conf" ~/.tmux.conf
 
 # Install nushell config
 echo "📦 Installing nushell configuration..."
-install_config "$CONFIGS_DIR/config.nu" ~/.config/nushell/config.nu
-install_config "$CONFIGS_DIR/env.nu" ~/.config/nushell/env.nu
+install_config "$SOURCE_CONFIGS_DIR/config.nu" "$TARGET_CONFIGS_DIR/nushell/config.nu"
+install_config "$SOURCE_CONFIGS_DIR/env.nu" "$TARGET_CONFIGS_DIR/nushell/env.nu"
+mkdir -p "$TARGET_CONFIGS_DIR/nushell/vendor/autoload"
+echo "$TARGET_CONFIGS_DIR/nushell/vendor/autoload"
+touch "$TARGET_CONFIGS_DIR/nushell/vendor/autoload/starship.nu"
+ls "$TARGET_CONFIGS_DIR/nushell/vendor/autoload"
 
 # Install starship config
 echo "📦 Installing starship configuration..."
-install_config "$CONFIGS_DIR/starship.toml" ~/.config/starship.toml
+install_config "$SOURCE_CONFIGS_DIR/starship.toml" "$TARGET_CONFIGS_DIR/starship.toml"
 
 # Install neovim config
 echo "📦 Installing neovim configuration..."
-install_config "$CONFIGS_DIR/init.vim" ~/.config/nvim/init.vim
+install_config "$SOURCE_CONFIGS_DIR/init.vim" "$TARGET_CONFIGS_DIR/nvim/init.vim"
 
-# Install zsh config
-# install_config "$CONFIGS_DIR/zshrc" ~/.zshrc
-
-# Install bashrc
-# echo "📦 Installing bashrc configuration..."
-#install_config "$CONFIGS_DIR/.bashrc" ~/.bashrc
-
-# Set default shell to nushell if not already
-# if [[ "$SHELL" != *nu ]]; then
-#   echo "🔀 Setting Nushell as default shell..."
-#   which nu > /dev/null 2>&1 || { echo "❌ Nushell (nu) not found in PATH"; exit 1; }
-#   echo "  📝 Changing default shell..."
-#   chsh -s "$(which nu)"
-#   echo "  ✅ Default shell changed to Nushell"
-# fi
+# Install shell config based on OS
+echo "📦 Installing zsh configuration..."
+install_config "$SOURCE_CONFIGS_DIR/zshrc" ~/.zshrc
+# echo "📦 Installing bash configuration..."
+# install_config "$SOURCE_CONFIGS_DIR/.bashrc" ~/.bashrc
 
 echo "✨ All configuration files installed successfully!"
