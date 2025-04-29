@@ -39,31 +39,30 @@ mkdir -p "$CACHE_DIR"/{starship,zoxide,fzf}
 echo "✅ Cache directories created"
 
 echo "🔧 Installing configuration files..."
+
 # Install tmux config
 echo "📦 Installing tmux configuration..."
 install_config "$SOURCE_CONFIGS_DIR/tmux.conf" ~/.tmux.conf
 
-# Install nushell config
-echo "📦 Installing nushell configuration..."
-install_config "$SOURCE_CONFIGS_DIR/config.nu" "$TARGET_CONFIGS_DIR/nushell/config.nu"
-install_config "$SOURCE_CONFIGS_DIR/env.nu" "$TARGET_CONFIGS_DIR/nushell/env.nu"
-mkdir -p "$TARGET_CONFIGS_DIR/nushell/vendor/autoload"
-echo "$TARGET_CONFIGS_DIR/nushell/vendor/autoload"
-touch "$TARGET_CONFIGS_DIR/nushell/vendor/autoload/starship.nu"
-ls "$TARGET_CONFIGS_DIR/nushell/vendor/autoload"
-
-# Install starship config
-echo "📦 Installing starship configuration..."
-install_config "$SOURCE_CONFIGS_DIR/starship.toml" "$TARGET_CONFIGS_DIR/starship.toml"
-
-# Install neovim config
 echo "📦 Installing neovim configuration..."
 install_config "$SOURCE_CONFIGS_DIR/init.vim" "$TARGET_CONFIGS_DIR/nvim/init.vim"
 
-# Install shell config based on OS
-echo "📦 Installing zsh configuration..."
-install_config "$SOURCE_CONFIGS_DIR/zshrc" ~/.zshrc
+# Install shell configs
+echo "📦 Installing starship configuration..."
+install_config "$SOURCE_CONFIGS_DIR/starship.toml" "$TARGET_CONFIGS_DIR/starship.toml"
+
 # echo "📦 Installing bash configuration..."
 # install_config "$SOURCE_CONFIGS_DIR/.bashrc" ~/.bashrc
+
+echo "📦 Installing zsh configuration..."
+install_config "$SOURCE_CONFIGS_DIR/zshrc" ~/.zshrc
+
+# echo "📦 Installing nushell configuration..."
+# install_config "$SOURCE_CONFIGS_DIR/config.nu" "$TARGET_CONFIGS_DIR/nushell/config.nu"
+# install_config "$SOURCE_CONFIGS_DIR/env.nu" "$TARGET_CONFIGS_DIR/nushell/env.nu"
+# mkdir -p "$TARGET_CONFIGS_DIR/nushell/vendor/autoload"
+# echo "$TARGET_CONFIGS_DIR/nushell/vendor/autoload"
+# touch "$TARGET_CONFIGS_DIR/nushell/vendor/autoload/starship.nu"
+# ls "$TARGET_CONFIGS_DIR/nushell/vendor/autoload"
 
 echo "✨ All configuration files installed successfully!"
