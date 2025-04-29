@@ -27,6 +27,10 @@ main() {
     echo "  ✅ Default shell changed to Nushell"
   fi
 
+  # Configure git to use nvim as editor
+  echo "📦 Configuring git to use nvim as editor..."
+  git config --global core.editor "nvim"
+
   # Show completion message
   cat << EOF
 🎉 Installation complete! Restart your terminal or run:
