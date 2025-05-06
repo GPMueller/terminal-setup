@@ -7,9 +7,8 @@ error_symbol = "[✗](bold red)"
 
 [hostname]
 ssh_only = true
-format = "[🌐 $hostname](bold green) "
+format = "[🌐 $(hostname -a 2>/dev/null | grep -v '^$' || hostname)](bold green) "
 trim_at = "."
-aliases = {"476428e-lcedt" = "workstation"}
 
 [directory]
 truncation_length = 0

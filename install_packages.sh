@@ -123,6 +123,12 @@ main() {
   # Install Nushell
   install_nushell
 
+  # Install Tmux Plugin Manager (TPM)
+  echo "📦 Installing Tmux Plugin Manager..."
+  mkdir -p ~/.config/tmux/plugins
+  git clone https://github.com/tmux-plugins/tpm ~/.config/tmux/plugins/tpm
+  echo "✅ TPM installed"
+
   # Install fonts
   echo "  🎨 Installing Hack Nerd Font..."
   if [[ "$(detect_platform)" == "mac" ]]; then
