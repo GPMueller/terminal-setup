@@ -16,49 +16,70 @@ detect_platform() {
 
 # Function to install Homebrew
 install_homebrew() {
-  echo "📦 Installing Homebrew..."
+  echo "📦 Installing/Updating Homebrew..."
   if ! command -v brew >/dev/null; then
     /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
     echo 'eval "$(/opt/homebrew/bin/brew shellenv)"' >> ~/.zprofile
     eval "$(/opt/homebrew/bin/brew shellenv)"
+  else
+    brew update
   fi
-  echo "✅ Homebrew installation complete"
+  echo "✅ Homebrew installation/update complete"
 }
 
 # Function to install Oh My Zsh
 install_ohmyzsh() {
-  echo "🐚 Installing Oh My Zsh..."
+  echo "🐚 Installing/Updating Oh My Zsh..."
   if [[ ! -d "$HOME/.oh-my-zsh" ]]; then
     sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
+  else
+    # Update existing installation
+    cd "$HOME/.oh-my-zsh"
+    git pull
+    cd - > /dev/null
   fi
-  echo "✅ Oh My Zsh installation complete"
+  echo "✅ Oh My Zsh installation/update complete"
 
-  # Install additional plugins
-  echo "📦 Installing Oh My Zsh plugins..."
-  if [[ ! -d "$HOME/.oh-my-zsh/custom/plugins/zsh-autosuggestions" ]]; then
-    git clone https://github.com/zsh-users/zsh-autosuggestions ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-autosuggestions
+  # Install/Update additional plugins
+  echo "📦 Installing/Updating Oh My Zsh plugins..."
+  local plugins_dir="$HOME/.oh-my-zsh/custom/plugins"
+  mkdir -p "$plugins_dir"
+
+  # zsh-autosuggestions
+  if [[ ! -d "$plugins_dir/zsh-autosuggestions" ]]; then
+    git clone https://github.com/zsh-users/zsh-autosuggestions "$plugins_dir/zsh-autosuggestions"
+  else
+    cd "$plugins_dir/zsh-autosuggestions"
+    git pull
+    cd - > /dev/null
   fi
-  if [[ ! -d "$HOME/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting" ]]; then
-    git clone https://github.com/zsh-users/zsh-syntax-highlighting.git ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-syntax-highlighting
+
+  # zsh-syntax-highlighting
+  if [[ ! -d "$plugins_dir/zsh-syntax-highlighting" ]]; then
+    git clone https://github.com/zsh-users/zsh-syntax-highlighting.git "$plugins_dir/zsh-syntax-highlighting"
+  else
+    cd "$plugins_dir/zsh-syntax-highlighting"
+    git pull
+    cd - > /dev/null
   fi
-  echo "✅ Oh My Zsh plugins installed"
+  echo "✅ Oh My Zsh plugins installed/updated"
 }
 
 # Function to install Linux tools
 install_linux_tools() {
-  echo "🔧 Installing Linux tools..."
+  echo "🔧 Installing/Updating Linux tools..."
   # Install eza (replacement for exa)
-  echo "  📦 Installing eza..."
+  echo "  📦 Installing/Updating eza..."
   EZA_VERSION="0.18.1"
   EZA_FILE="eza_x86_64-unknown-linux-gnu.tar.gz"
   curl -LO "https://github.com/eza-community/eza/releases/download/v${EZA_VERSION}/${EZA_FILE}"
   tar -xzf "${EZA_FILE}"
   sudo mv eza /usr/local/bin/
   rm -rf eza ${EZA_FILE} LICENSE man completions
-  echo "  ✅ eza installed"
+  echo "  ✅ eza installed/updated"
 
   # Install ripgrep
-  echo "  📦 Installing ripgrep..."
+  echo "  📦 Installing/Updating ripgrep..."
   if ! command -v rg >/dev/null; then
     if sudo apt-get install -y ripgrep; then
       echo "  ✅ ripgrep installed via apt"
@@ -69,8 +90,11 @@ install_linux_tools() {
       rm "${RG_DEB}"
       echo "  ✅ ripgrep installed via deb package"
     fi
+  else
+    sudo apt-get upgrade -y ripgrep
+    echo "  ✅ ripgrep updated"
   fi
-  echo "✅ Linux tools installation complete"
+  echo "✅ Linux tools installation/update complete"
 }
 
 # Function to install Nushell
@@ -89,53 +113,65 @@ install_nushell() {
   echo "✅ Nushell installation complete"
 }
 
+# Function to install Tmux Plugin Manager
+install_tpm() {
+  echo "📦 Installing/Updating Tmux Plugin Manager..."
+  local tpm_dir="$HOME/.config/tmux/plugins/tpm"
+  if [[ ! -d "$tpm_dir" ]]; then
+    mkdir -p "$(dirname "$tpm_dir")"
+    git clone https://github.com/tmux-plugins/tpm "$tpm_dir"
+  else
+    cd "$tpm_dir"
+    git pull
+    cd - > /dev/null
+  fi
+  echo "✅ TPM installed/updated"
+}
+
 # Main installation function
 main() {
   local PLATFORM=$(detect_platform)
-  echo "🚀 Starting package installation for $PLATFORM..."
+  echo "🚀 Starting package installation/update for $PLATFORM..."
 
   if [[ "$PLATFORM" == "mac" ]]; then
     install_homebrew
-    echo "📦 Installing core packages..."
-    brew install tmux eza fzf neovim ripgrep coreutils git
-    echo "✅ Core packages installed"
+    echo "📦 Installing/Updating core packages..."
+    brew install tmux eza fzf neovim ripgrep coreutils git figlet lolcat || brew upgrade tmux eza fzf neovim ripgrep coreutils git figlet lolcat
+    echo "✅ Core packages installed/updated"
   else
     echo "📦 Updating package lists..."
     sudo apt-get update
-    echo "📦 Installing core packages..."
-    sudo apt-get install -y tmux unzip neovim curl wget fontconfig git build-essential pkg-config libssl-dev
-    echo "✅ Core packages installed"
+    echo "📦 Installing/Updating core packages..."
+    sudo apt-get install -y tmux unzip neovim curl wget fontconfig git build-essential pkg-config libssl-dev figlet lolcat
+    echo "✅ Core packages installed/updated"
     install_linux_tools
   fi
 
   # Install Oh My Zsh
-  # install_ohmyzsh
+  install_ohmyzsh
 
   # Platform-agnostic tools
-  echo "🌟 Installing Starship prompt..."
+  echo "🌟 Installing/Updating Starship prompt..."
   curl -sS https://starship.rs/install.sh | sh -s -- --yes
-  echo "✅ Starship installed"
+  echo "✅ Starship installed/updated"
 
-  echo "📍 Installing Zoxide..."
+  echo "📍 Installing/Updating Zoxide..."
   curl -sS https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh | sh
-  echo "✅ Zoxide installed"
+  echo "✅ Zoxide installed/updated"
 
   # Install Nushell
   install_nushell
 
-  # Install Tmux Plugin Manager (TPM)
-  echo "📦 Installing Tmux Plugin Manager..."
-  mkdir -p ~/.config/tmux/plugins
-  git clone https://github.com/tmux-plugins/tpm ~/.config/tmux/plugins/tpm
-  echo "✅ TPM installed"
+  # Install Tmux Plugin Manager
+  install_tpm
 
   # Install fonts
-  echo "  🎨 Installing Hack Nerd Font..."
-  if [[ "$(detect_platform)" == "mac" ]]; then
+  echo "  🎨 Installing/Updating Hack Nerd Font..."
+  if [[ "$PLATFORM" == "mac" ]]; then
     install_homebrew
-    echo "  📦 Installing font via Homebrew..."
-    brew install --cask font-hack-nerd-font
-    echo "  ✅ Font installed via Homebrew"
+    echo "  📦 Installing/Updating font via Homebrew..."
+    brew install --cask font-hack-nerd-font || brew upgrade --cask font-hack-nerd-font
+    echo "  ✅ Font installed/updated via Homebrew"
   else
     echo "  📁 Creating fonts directory..."
     mkdir -p ~/.local/share/fonts
@@ -157,10 +193,10 @@ main() {
     rm -rf Hack.zip HackFont
     cd - > /dev/null
 
-    echo "  ✅ Font installation complete"
+    echo "  ✅ Font installation/update complete"
   fi
 
-  echo "✨ All package installations complete!"
+  echo "✨ All package installations/updates complete!"
 }
 
 main

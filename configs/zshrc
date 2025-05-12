@@ -136,21 +136,52 @@ welcome_msg() {
   [[ $- == *i* ]] || return
 
   # Generate dynamic ASCII art with random font/color
-  local art_font=$(find ~/.local/share/figlet-fonts/ -name "*.flf" | shuf -n 1)
-  echo -e "\n$(figlet -f "$art_font" "Welcome" | lolcat)"
+  local font_dirs=()
+  if [[ "$OSTYPE" == "darwin"* ]]; then
+    font_dirs=(
+      "/opt/homebrew/share/figlet"
+      "/usr/local/share/figlet"
+      "/usr/local/opt/figlet/share/figlet"
+    )
+  else
+    font_dirs=(
+      "~/.local/share/figlet-fonts"
+      "/usr/share/figlet"
+    )
+  fi
+
+  local art_font=""
+  for dir in "${font_dirs[@]}"; do
+    if [[ -d "$dir" ]]; then
+      art_font=$(find "$dir" -name "*.flf" 2>/dev/null | shuf -n 1)
+      [[ -n "$art_font" ]] && break
+    fi
+  done
+
+  echo -e "\n"
+  if [[ -n "$art_font" ]]; then
+    figlet -f "$art_font" "Welcome" | lolcat
+  else
+    figlet "Welcome" | lolcat
+  fi
 
   # System info panel
-  local sys_info="$(uname -srmo)"
-  local uptime="$(uptime -p | sed 's/up //')"
-  local mem_usage="$(free -m | awk '/Mem:/ {printf "%.1f% (%.1f / %.1f GB)", $3/$2*100, $3/1024, $2/1024}')"
-  local disk_info=$(df -h / | awk 'NR==2 {printf "%s (%s / %s)", $5, $3, $4}')
-
-  # Format system info with ANSI colors
   printf "\033[1;34m╭─\033[0m \033[1;36mSystem Overview\033[0m\n"
+  local sys_info="$(uname -srmo)"
   printf "\033[1;34m├─\033[0m \033[1;37mOS:\033[0m     \033[1;32m%s\033[0m\n" "$sys_info"
+  local uptime="$(uptime | sed 's/.*up \([^,]*\), .*/\1/')"
   printf "\033[1;34m├─\033[0m \033[1;37mUptime:\033[0m \033[1;32m%s\033[0m\n" "$uptime"
-  printf "\033[1;34m├─\033[0m \033[1;37mMemory:\033[0m \033[1;32m%s\033[0m\n" "$mem_usage"
-  printf "\033[1;34m╰─\033[0m \033[1;37mDisk:\033[0m   \033[1;32m%s\033[0m\n\n" "$disk_info"
+
+  # Get memory info and disk info
+  if [[ "$OSTYPE" != "darwin"* ]]; then
+    local mem_usage="$(free -m | awk '/Mem:/ {printf "%.1f%% (%.1f / %.1f GB)", $3/$2*100, $3/1024, $2/1024}')"
+    printf "\033[1;34m├─\033[0m \033[1;37mMemory:\033[0m \033[1;32m%s\033[0m\n" "$mem_usage"
+    local disk_info="$(df -h / | awk 'NR==2 {printf "%s (%s / %s)", $5, $3, $4}')"
+    printf "\033[1;34m╰─\033[0m \033[1;37mDisk:\033[0m   \033[1;32m%s\033[0m\n\n" "$disk_info"
+  else
+    printf "\033[1;34m╰─\033[0m\n\n"
+  fi
+
 
   # Enhanced tmux session display
   tmux_msg

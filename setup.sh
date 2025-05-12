@@ -14,28 +14,43 @@ main() {
   # Install all configuration files
   "$SCRIPT_DIR/install_configs.sh"
 
-  # Set default shell to nushell if not already
-  if [[ "$SHELL" != *nu ]]; then
-    echo "🔀 Setting Nushell as default shell..."
-    which nu > /dev/null 2>&1 || { echo "❌ Nushell (nu) not found in PATH"; exit 1; }
+  # Set default shell to zsh if not already
+  if [[ "$SHELL" != *zsh ]]; then
+    echo "🔀 Setting Zsh as default shell..."
+    which zsh > /dev/null 2>&1 || { echo "❌ Zsh not found in PATH"; exit 1; }
     echo "  📝 Changing default shell..."
-    if [[ "$OS" == "macos" ]]; then
-      sudo dscl . -change /Users/$USER UserShell "$SHELL" "$(which nu)"
+    if [[ "$OSTYPE" == "darwin"* ]]; then
+      # Check if we need to change the shell
+      current_shell=$(dscl . -read /Users/$USER UserShell | cut -d' ' -f2)
+      if [[ "$current_shell" != "$(which zsh)" ]]; then
+        sudo dscl . -change /Users/$USER UserShell "$current_shell" "$(which zsh)"
+        echo "  ✅ Default shell changed to Zsh"
+      else
+        echo "  ℹ️  Zsh is already the default shell"
+      fi
     else
-      chsh -s "$(which nu)"
+      chsh -s "$(which zsh)"
+      echo "  ✅ Default shell changed to Zsh"
     fi
-    echo "  ✅ Default shell changed to Nushell"
+  else
+    echo "ℹ️  Zsh is already the default shell"
   fi
 
   # Configure git to use nvim as editor
-  echo "📦 Configuring git to use nvim as editor..."
-  git config --global core.editor "nvim"
+  current_editor=$(git config --global core.editor || echo "")
+  if [[ "$current_editor" != "nvim" ]]; then
+    echo "📦 Configuring git to use nvim as editor..."
+    git config --global core.editor "nvim"
+    echo "✅ Git editor configured"
+  else
+    echo "ℹ️  Git is already configured to use nvim"
+  fi
 
   # Show completion message
   cat << EOF
-🎉 Installation complete! Restart your terminal or run:
+🎉 Installation/Update complete! Restart your terminal or run:
 
-  exec nu
+  exec zsh
 
 ESSENTIAL NEXT STEPS:
  1. Set your terminal font to "Hack Nerd Font":
